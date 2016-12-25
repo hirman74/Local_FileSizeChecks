@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vbscript File Size Check</title>
+<HTA:APPLICATION 
+	ID="FileSizerCLI"
+	APPLICATIONNAME="FileSizingIT"
+	SCROLL="yes"
+	SINGLEINSTANCE="yes"
+	maximizeButton="no" 
+	minimizeButton="yes" 
+	showInTaskbar="yes" 
+	caption = "no"
+	BORDERSTYLE="raised"
+	BORDER="thick"
+>
+</head>
+
+<SCRIPT Language="VBScript">
+Public resultName
+
+Sub Window_Onload
+	self.Focus()
+	self.ResizeTo 600,400
+End Sub
+
+Sub RunReload
+    Location.Reload(True)
+End Sub
+
+Function LogOff()
+	window.close
+End Function
+
+class filingName
+	public name
+end class 
+
+Function resultNameNow ()
+	dim m
+	set m = new filingName
+	If Len (month(now)) < 2 Then
+		monthly = "0" & (month(now))
+	Else
+		monthly = (month(now))
+	End If
+
+	If Len (day(now)) < 2 Then
+		dayly = "0" & (day(now))
+	Else
+		dayly = (day(now))
+	End If
+
+	If Len (hour(now)) < 2 Then
+		hourly = "0" & (hour(now))
+	Else
+		hourly = (hour(now))
+	End If
+
+	If Len (minute(now)) < 2 Then
+		minutely = "0" & (minute(now))
+	Else
+		minutely = (minute(now))
+	End If
+
+	If Len (second(now)) < 2 Then
+		secondly = "0" & (second(now))
+	Else
+		secondly = (second(now))
+	End If
+	m.name = "FileSizeChecker_" & year(now) & monthly & dayly & "_" & hourly & minutely & secondly
+	set resultNameNow = m
+End Function
+
+Sub MainSub
+	Set m = resultNameNow()
+	resultName = m.name
+	Dim listFolders, localFolder, byteFormat, decimalCount, byteCreated, writeByte
+	listFolders = localVariables.textAreaListFolders.value
+	localFolder = Split (listFolders,vbCRLF)
+	byteFormat = localVariables.byteSize.value	
+	decimalCount = localVariables.decimalSize.value
+	'ON ERROR RESUME NEXT
+	Const ForReading = 1, ForWriting = 2, ForAppending = 8, OpenAsDefault = -2, FailIfNotExist = 0	
+	
+	Select Case byteFormat
+	Case "GB"
+		writeByte = ",in GigaByte"
+	Case "MB"
+		writeByte = ",in MegaByte"
+	Case "KB"
+		writeByte = ",in KiloByte"
+	End Select
+
+	Dim objFSO
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+		For Each folderCheck In localFolder				
+			If Instr(folderCheck,"\") = 0 Then
+				folderCheck = Replace(folderCheck,"/","\")
+				Set objTextFile = objFso.OpenTextFile (resultName & ".csv", ForAppending, True,OpenAsDefault)
+				objTextFile.WriteLine("File list at " & folderCheck & writeByte)
+				Set objFolder = objFso.GetFolder(Trim(folderCheck))
+					For each objFile in objFolder.Files
+						If objFolder.Files.Count > 0 Then						
+							Select Case byteFormat
+							Case "GB"
+								byteCreated = objFile.Size / 1024 / 1024 / 1024
+							Case "MB"
+								byteCreated = objFile.Size / 1024 / 1024
+							Case "KB"
+								byteCreated = objFile.Size / 1024 
+							End Select
+
+							Select Case decimalCount
+							Case "3"
+								printedSize = FormatNumber(byteCreated,3,-1,0,0)
+							Case "4"
+								printedSize = FormatNumber(byteCreated,4,-1,0,0)
+							Case "5"
+								printedSize = FormatNumber(byteCreated,5,-1,0,0)
+							End Select
+							
+							objTextFile.WriteLine(objFile.Name & "," & printedSize)						
+						End If				
+					Next
+				objTextFile.close
+			ElseIf Instr(folderCheck,"\") > 0 Then
+				Set objTextFile = objFso.OpenTextFile (resultName & ".csv", ForAppending, True,OpenAsDefault)
+				objTextFile.WriteLine("File list at " & folderCheck & writeByte)
+				Set objFolder = objFso.GetFolder(Trim(folderCheck))
+					For each objFile in objFolder.Files
+						If objFolder.Files.Count > 0 Then						
+							Select Case byteFormat
+							Case "GB"
+								byteCreated = objFile.Size / 1024 / 1024 / 1024
+							Case "MB"
+								byteCreated = objFile.Size / 1024 / 1024
+							Case "KB"
+								byteCreated = objFile.Size / 1024 
+							End Select
+
+							Select Case decimalCount
+							Case "3"
+								printedSize = FormatNumber(byteCreated,3,-1,0,0)
+							Case "4"
+								printedSize = FormatNumber(byteCreated,4,-1,0,0)
+							Case "5"
+								printedSize = FormatNumber(byteCreated,5,-1,0,0)
+							End Select
+							
+							objTextFile.WriteLine(objFile.Name & "," & printedSize)						
+						End If				
+					Next
+				objTextFile.close
+			End If
+
+
+		Next
+
+	Set objFSO = Nothing
+	Set byteCreated = Nothing
+	Set listFolders = Nothing
+	Set localFolder = Nothing
+	Set byteFormat = Nothing
+	Set decimalCount = Nothing
+	Set writeByte = Nothing
+	DataArea.InnerHtml = "Script completed. <br>Refer to generated file/s : " &  resultName & ".csv"
+End Sub
+
+</SCRIPT>
+
+<body style="background-color:#42f4c8;">
+<form name="localVariables">
+<table style="width:100%" border=1>
+<tr><td colspan =2>Local folders to scan for file sizes</td></tr>
+<tr><td colspan =2><TEXTAREA style="Height:150px;Width:100%;font-Size:12;font-weight:normal;background-color:pink;";TITLE=""; NAME="textAreaListFolders"; WRAP=hard>
+C:\application\logs
+C:\application\temp
+C:\Windows</TEXTAREA></td></tr>
+<tr><td align=right>File size report in &nbsp</td>
+<td>
+<select name="byteSize" style="font-weight:bold;width:70px">
+	<option value="GB"> &nbsp GB</option>
+	<option value="MB"> &nbsp MB</option>
+	<option value="KB"> &nbsp KB</option>	
+</select> format, to <select name="decimalSize" style="font-weight:bold;width:70px">
+	<option value="3"> &nbsp 3</option>
+	<option value="4"> &nbsp 4</option>
+	<option value="5"> &nbsp 5</option>	
+</select> decimal points.</td></tr>
+<!--<tr><td align=right>Username</td>  <td><input type="text" name="strUser" style="width:260px;background-color:#f48942" ></td></tr>
+<tr><td align=right>Password</td> <td><input type="password" name="strPassword" style="width:260px;background-color:#f48942" > </td></tr>-->
+</table>
+</form>
+
+<input type="button" style="width:100px;height:25px" value="Submit" onClick="MainSub()" title="Map folder and collect file size.">
+<input type="button" style="width:100px;height:25px" value="Quit" onClick="Logoff()" title="Close this window.">
+<input type="button" style="width:100px;height:25px" value="Reset" onClick="RunReload()" title="Reset this window.">
+<br>
+
+<hr></hr>
+<Span Id = "DataArea"></Span>
+<br>
+
+</body>
+</html>
