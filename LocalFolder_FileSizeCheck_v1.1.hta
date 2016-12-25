@@ -102,7 +102,7 @@ Function fillWriteFile (folderCheck, resultName, writeByte, byteFormat,decimalCo
 			Case "5"
 				printedSize = FormatNumber(byteCreated,5,-1,0,0)
 			End Select			
-			objTextFile.WriteLine( """" & objFile.Name & """" &  ","  & """" &  Trim(folderCheck)  & """" &  ","  & """" &  printedSize & """" &  "," & writeByte   )						
+			objTextFile.WriteLine( """" & objFile.Name & """" &  ","  & """" &  Trim(folderCheck)  & """" &  ","  & """" &  printedSize & """" &  "," & writeByte &  ","  & """" &  objFile.DateCreated & """" &  ","  & """" &  objFile.DateLastModified & """" )						
 		End If				
 	Next
 	objTextFile.close
@@ -153,7 +153,7 @@ Sub MainSub
 	
 		If Len(folderCheck) > 0 Then
 		Set objTextFile = objFso.OpenTextFile (resultName & ".csv", ForAppending, True,OpenAsDefault)
-			objTextFile.WriteLine("File Name,Folder Name,File Size, Unit Size")
+			objTextFile.WriteLine("File Name,Folder Name,File Size, Unit Size, DateCreated, DateLastModified")
 			objTextFile.close			
 			Call fillWriteFile (folderCheck, resultName, writeByte, byteFormat,decimalCount)
 			If localVariables.recursingFolders.checked Then				
@@ -182,9 +182,7 @@ Set resultName = Nothing
 <tr><td colspan =2>Local folders to scan for file sizes</td></tr>
 <tr><td colspan =2><TEXTAREA style="Height:150px;Width:100%;font-Size:12;font-weight:normal;background-color:pink;";TITLE=""; NAME="textAreaListFolders"; WRAP=hard>
 C:\application\logs
-C:\application\temp
-C:\Windows
-E:\Hackintosh-h97m-e-Sierra</TEXTAREA></td></tr>
+C:\application\temp</TEXTAREA></td></tr>
 <tr><td align=right>File size report in &nbsp</td>
 <td>
 <select name="byteSize" style="font-weight:bold;width:70px">
